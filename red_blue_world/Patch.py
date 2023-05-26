@@ -1,7 +1,9 @@
 import numpy as np
 
-from typing import Tuple
-from interfaces import State, Action, Reward, Direction
+from typing import Any, Tuple, NewType
+from red_blue_world.interfaces import AgentState, Action, Reward, Direction
+
+PatchState = NewType('PatchState', Any)
 
 # TODO: this should be a contract/interface for a patch
 #  - A patch should be loadable, but is not responsible for deciding when to load
@@ -15,11 +17,14 @@ from interfaces import State, Action, Reward, Direction
 
 
 class Patch:
-    def load(self) -> None:
+    def load(self, patch_state: PatchState) -> None:
         ...
 
-    def on_enter(self, last_state: np.ndarray) -> None:
+    def on_enter(self, last_agent_state: np.ndarray) -> None:
         ...
 
-    def step(self, action: Action) -> Tuple[State, Reward, Direction]:
+    def step(self, action: Action) -> Tuple[AgentState, Reward, Direction]:
+        ...
+
+    def serialize(self) -> PatchState:
         ...

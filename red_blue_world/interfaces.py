@@ -1,7 +1,7 @@
 import numpy as np
 import enum
 
-State = np.ndarray
+AgentState = np.ndarray
 Action = int
 Reward = float
 
