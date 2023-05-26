@@ -1,7 +1,7 @@
 import numpy as np
 
 from typing import Tuple
-from interfaces import State, Action, Reward, Direction
+from red_blue_world.interfaces import State, Action, Reward, Direction
 
 # TODO: this should be a contract/interface for a patch
 #  - A patch should be loadable, but is not responsible for deciding when to load
