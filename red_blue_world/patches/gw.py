@@ -1,14 +1,7 @@
 import numpy as np
 
-import os
-import sys
-sys.path.append(os.getcwd())
-
 from red_blue_world.Patch import Patch
 from typing import Tuple, NamedTuple
-
-
-Patch = object
 
 RIGHT = 0
 DOWN = 1
