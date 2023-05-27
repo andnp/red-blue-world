@@ -60,7 +60,7 @@ class GridWorld(Patch):
         return config_list
     
     @staticmethod
-    def take_action(state: np.ndarray, action: int) -> Tuple[int, int]:
+    def take_action(state: tuple, action: int) -> Tuple[int, int]:
         """
             Takes an action and returns the new state.
         """

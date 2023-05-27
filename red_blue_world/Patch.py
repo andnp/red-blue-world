@@ -21,5 +21,5 @@ class Patch:
     def on_enter(self, last_state: np.ndarray) -> None:
         ...
 
-    def step(self, action: Action) -> Tuple[State, Reward, Direction]:
+    def step(self, action: Action): # -> Tuple[State, Reward, Direction]:
         ...
