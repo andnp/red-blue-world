@@ -11,35 +11,54 @@ UP = 3
 BEAN = 0
 ONION = 1
 
+OBJECT_PERCENTAGE = 0.1
+
 class PatchConfig(NamedTuple):
-    tag: int
-    coordinates: Tuple[int,int]
+    label: int
+    x: int
+    y: int
 
 class GridWorld(Patch):
     def __init__(self, size: int):
         self._size = size
         self._state = np.zeros(2)
         
+        self._cell_num = self._size ** 2
+        
     def _choose_objects(self):
-        object_num = min(max(int((self._size ** 2) * 0.2), 1), self._size ** 2)
-        choosen_coords = np.random.choice(self._size ** 2, object_num)
+        """
+            Returns a tuple of coordinates and corresponding labels of both jelly beans and onions.
+        """
+        object_num = min(max(int(self._cell_num * OBJECT_PERCENTAGE), 1), self._cell_num)
+        choosen_coords = np.random.choice(self._cell_num, object_num)
         labels = np.random.choice([BEAN, ONION], size=object_num)
         return choosen_coords, labels
     
-    def _get_config(self, choosen_coords, labels):
-        config = []
+    def _get_config(self, choosen_coords: np.ndarray, labels: np.ndarray):
+        """
+            Returns a list of PatchConfig objects where each corresponds to 
+            the object label and coordinates.
+        """
+        config = np.zeros(len(choosen_coords), dtype=PatchConfig)
         for i, coord in enumerate(choosen_coords):
             x = coord // self._size
             y = coord % self._size
-            config.append(PatchConfig(labels[i], (x, y)))
+            config[i] = PatchConfig(labels[i], x, y)
         return config
     
     def generate(self):
+        """
+            Generates the grid world by adding the objects to the grid and 
+            returns a list of PatchConfig objects.
+        """
         occupancy = self._choose_objects()
         config_list = self._get_config(*occupancy)   
         return config_list
     
     def take_action(self, state, action) -> Tuple[int, int]:
+        """
+            Takes an action and returns the new state.
+        """
         x, y = state
         if action == RIGHT:
             x += 1
@@ -56,7 +75,7 @@ class GridWorld(Patch):
         
     
 if __name__ == '__main__':
-    gw = GridWorld(2)
+    gw = GridWorld(20)
     
     print(gw.generate())
     print(gw.take_action((0,0), RIGHT))
