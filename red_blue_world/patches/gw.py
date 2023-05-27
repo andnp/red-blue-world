@@ -14,6 +14,9 @@ ONION = 1
 OBJECT_PERCENTAGE = 0.1
 
 class PatchConfig(NamedTuple):
+    """
+        A named tuple that represents the configuration of a patch coordinates.
+    """
     label: int
     x: int
     y: int
@@ -23,6 +26,7 @@ class GridWorld(Patch):
         self._size = size
         self._state = np.zeros(2)
         
+        # getting the total number of cells in the grid
         self._cell_num = self._size ** 2
         
     def _choose_objects(self):
@@ -55,7 +59,8 @@ class GridWorld(Patch):
         config_list = self._get_config(*occupancy)   
         return config_list
     
-    def take_action(self, state, action) -> Tuple[int, int]:
+    @staticmethod
+    def take_action(state: np.ndarray, action: int) -> Tuple[int, int]:
         """
             Takes an action and returns the new state.
         """
@@ -73,9 +78,3 @@ class GridWorld(Patch):
 
         return x, y
         
-    
-if __name__ == '__main__':
-    gw = GridWorld(20)
-    
-    print(gw.generate())
-    print(gw.take_action((0,0), RIGHT))
