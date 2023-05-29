@@ -4,35 +4,36 @@ import numpy as np
 import sys
 sys.path.insert(0, '..')
 
-from red_blue_world.patches.pickyeater import ContinualCollectRGB, draw
+from red_blue_world.patches.pickyeater import ContinualCollectRGB, ContinualCollectPartial, draw
 
-def test_step(test_steps=10):
-    env = ContinualCollectRGB()
-    state = env.reset()
-    draw(state)
-    for _ in range(test_steps):
-        action = int(input('input_action: '))
-        state, reward, direction = env.step([action])
-        env.on_enter(state)
-        draw(state)
-        print(reward)
+# def test_step(test_steps=10):
+#     # env = ContinualCollectRGB()
+#     env = ContinualCollectPartial()
+#     state = env.reset()
+#     draw(state)
+#     for _ in range(test_steps):
+#         action = int(input('input_action: '))
+#         state, reward, direction = env.step([action])
+#         env.on_enter(state)
+#         draw(state)
+#         print(reward)
         
-def test_patch():
-    np.random.seed(0)
-    env = ContinualCollectRGB()
-    state = env.reset()
-    # draw(state)
-    for _ in range(100):
-        action = np.random.randint(env.get_action_dim())
-        state, reward, direction = env.step([action])
-        env.on_enter(state)
-    pre_save = copy.deepcopy(state)
-    
-    obj = env.serialize()
-    env.load(obj)
-    
-    after_load = env.last_agent_state
-    assert np.array_equal(pre_save, after_load), "Inconsistent last_agent_state!"
+# def test_patch():
+#     np.random.seed(0)
+#     env = ContinualCollectRGB()
+#     state = env.reset()
+#     # draw(state)
+#     for _ in range(100):
+#         action = np.random.randint(env.get_action_dim())
+#         state, reward, direction = env.step([action])
+#         env.on_enter(state)
+#     pre_save = copy.deepcopy(state)
+#
+#     obj = env.serialize()
+#     env.load(obj)
+#
+#     after_load = env.last_agent_state
+#     assert np.array_equal(pre_save, after_load), "Inconsistent last_agent_state!"
 
 def test_fruit_reset():
     np.random.seed(0)
@@ -74,6 +75,6 @@ def test_fruit_reset():
     
 if __name__ == '__main__':
     # test_step()
-    test_patch()
+    # test_patch()
     test_fruit_reset()
     

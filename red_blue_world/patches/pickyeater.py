@@ -227,8 +227,40 @@ class ContinualCollectRGB(ContinualCollectXY):
         else:
             raise NotImplementedError
 
+class ContinualCollectPartial(ContinualCollectRGB):
+    def __init__(self, seed=np.random.randint(int(1e5))):
+        super().__init__(seed)
 
+    def generate_state(self, agent_loc, object_status, reds, blues):
+        state = super().generate_state(agent_loc, object_status, reds, blues)
+        x, y = agent_loc
+        if (x < 7 and y < 7):
+            visual = [[i,j] for i in range(0, 8) for j in range(0, 8)]
+        elif (x > 7 and y < 7):
+            visual = [[i,j] for i in range(7, 15) for j in range(0, 8)]
+        elif (x < 7 and y > 7):
+            visual = [[i,j] for i in range(0, 8) for j in range(7, 15)]
+        elif (x > 7 and y > 7):
+            visual = [[i,j] for i in range(7, 15) for j in range(7, 15)]
+        elif (x == 7 and y < 7):
+            visual = [[i,j] for i in range(0, 15) for j in range(0, 8)]
+        elif (x == 7 and y > 7):
+            visual = [[i,j] for i in range(0, 15) for j in range(7, 15)]
+        elif (x < 7 and y == 7):
+            visual = [[i,j] for i in range(0, 8) for j in range(0, 15)]
+        elif (x > 7 and y == 7):
+            visual = [[i,j] for i in range(7, 15) for j in range(0, 15)]
+        else:
+            raise NotImplementedError
+        for coord in [[i,j] for i in range(0, 15) for j in range(0, 15)]:
+            if coord not in visual:
+                state[coord[0], coord[1]] = np.array([128., 128., 128.])
+            else:
+                print(coord, state[coord])
+        print(state.shape)
+        return state
 
+        
 def draw(state):
     frame = state.astype(np.uint8)
     figure, ax = plt.subplots()
