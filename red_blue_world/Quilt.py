@@ -37,6 +37,7 @@ class Quilt:
 
             self._active_patch_id = next_id
             self._active_patch = self._patches[next_id]
+            self._active_patch.on_enter(s)
 
         return (s, r)
 
