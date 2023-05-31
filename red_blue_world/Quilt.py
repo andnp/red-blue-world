@@ -10,16 +10,16 @@ from red_blue_world.Patch import Patch
 PatchID = Tuple[int, int]
 
 class Quilt:
-    def __init__(self):
+    def __init__(self) -> None:
         self._patches: Dict[PatchID, Patch] = {}
         self._active_patch_id: PatchID = (0, 0)
-        self._active_patch: Patch = ...
+        self._active_patch: Patch = self.build_patch()
 
-    def ensure_load9x9(self):
+    def ensure_load9x9(self) -> None:
         for coord in product(range(3), range(3)):
             if coord in self._patches: continue
 
             # TODO: tell patch loader to grab patch ${coord}
 
     def build_patch(self) -> Patch:
-        ...
+        raise NotImplementedError()

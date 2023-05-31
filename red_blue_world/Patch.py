@@ -1,9 +1,11 @@
 import numpy as np
 
-from typing import Any, Tuple, NewType
+from abc import abstractmethod
+from typing import Any, Tuple
 from red_blue_world.interfaces import AgentState, Action, Reward, Direction
 
-PatchState = NewType('PatchState', Any)
+# TODO: make this a nominal type once API has been decided
+PatchState = Any
 
 # TODO: this should be a contract/interface for a patch
 #  - A patch should be loadable, but is not responsible for deciding when to load
@@ -17,14 +19,18 @@ PatchState = NewType('PatchState', Any)
 
 
 class Patch:
+    @abstractmethod
     def load(self, patch_state: PatchState) -> None:
         ...
 
+    @abstractmethod
     def on_enter(self, last_agent_state: np.ndarray) -> None:
         ...
 
+    @abstractmethod
     def step(self, action: Action) -> Tuple[AgentState, Reward, Direction]:
         ...
 
+    @abstractmethod
     def serialize(self) -> PatchState:
         ...
