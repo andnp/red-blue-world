@@ -29,7 +29,7 @@ class GridWorld(Patch):
         # getting the total number of cells in the grid
         self._cell_num = self._size ** 2
         
-    def _choose_objects(self):
+    def _choose_objects(self) -> Tuple[np.ndarray, np.ndarray]:
         """
             Returns a tuple of coordinates and corresponding labels of both jelly beans and onions.
         """
@@ -47,7 +47,7 @@ class GridWorld(Patch):
         y = coord // self._size
         return x, y
     
-    def _get_config(self, choosen_coords: np.ndarray, labels: np.ndarray):
+    def _get_config(self, choosen_coords: np.ndarray, labels: np.ndarray) -> dict:
         """
             Returns a list of PatchConfig objects where each corresponds to 
             the object label and coordinates.
@@ -58,10 +58,10 @@ class GridWorld(Patch):
             config[coords] = PatchConfig(label, *coords)
         return config
     
-    def generate(self):
+    def generate(self) -> dict:
         """
             Generates the grid world by adding the objects to the grid and 
-            returns a list of PatchConfig objects.
+            returns a dictionary of PatchConfig objects.
         """
         occupancy = self._choose_objects()
         config_list = self._get_config(*occupancy)   
@@ -86,12 +86,3 @@ class GridWorld(Patch):
 
         return x, y
         
-if __name__ == '__main__':
-    grid = GridWorld(3)
-    config = grid.generate()
-    print(config)
-    # print(grid.take_action((0, 0), RIGHT))
-    # print(grid.take_action((0, 0), DOWN))
-    # print(grid.take_action((0, 0), LEFT))
-    # print(grid.take_action((0, 0), UP))
-    # print(grid.take_action((0, 0), 4))
