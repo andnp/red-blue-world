@@ -8,8 +8,8 @@ DOWN = 1
 LEFT = 2
 UP = 3
 
-BEAN = 0
-ONION = 1
+FLOWER = 0
+WEED = 1
 
 OBJECT_PERCENTAGE = 0.1
 
@@ -35,19 +35,27 @@ class GridWorld(Patch):
         """
         object_num = min(max(int(self._cell_num * OBJECT_PERCENTAGE), 1), self._cell_num)
         choosen_coords = np.random.choice(self._cell_num, object_num)
-        labels = np.random.choice([BEAN, ONION], size=object_num)
+        labels = np.random.choice([FLOWER, WEED], size=object_num)
         return choosen_coords, labels
+    
+    def _to_coords(self, coord: int) -> Tuple[int, int]:
+        """
+            Returns the coordinates of the cell.
+        """
+        print(coord)
+        x = coord % self._size
+        y = coord // self._size
+        return x, y
     
     def _get_config(self, choosen_coords: np.ndarray, labels: np.ndarray):
         """
             Returns a list of PatchConfig objects where each corresponds to 
             the object label and coordinates.
         """
-        config = np.zeros(len(choosen_coords), dtype=PatchConfig)
-        for i, coord in enumerate(choosen_coords):
-            x = coord // self._size
-            y = coord % self._size
-            config[i] = PatchConfig(labels[i], x, y)
+        config = {}
+        for coord_idx, label in zip(choosen_coords, labels):
+            coords = self._to_coords(coord_idx)
+            config[coords] = PatchConfig(label, *coords)
         return config
     
     def generate(self):
@@ -78,3 +86,12 @@ class GridWorld(Patch):
 
         return x, y
         
+if __name__ == '__main__':
+    grid = GridWorld(3)
+    config = grid.generate()
+    print(config)
+    # print(grid.take_action((0, 0), RIGHT))
+    # print(grid.take_action((0, 0), DOWN))
+    # print(grid.take_action((0, 0), LEFT))
+    # print(grid.take_action((0, 0), UP))
+    # print(grid.take_action((0, 0), 4))
