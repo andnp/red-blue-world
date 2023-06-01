@@ -42,7 +42,6 @@ class GridWorld(Patch):
         """
             Returns the coordinates of the cell.
         """
-        print(coord)
         x = coord % self._size
         y = coord // self._size
         return x, y
