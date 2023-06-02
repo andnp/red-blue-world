@@ -81,6 +81,11 @@ class ContinualCollectXY(CCPatch):
         blues = np.array(blues).flatten()
         return np.concatenate([np.array(agent_loc), object_status * 14, reds, blues])
 
+    def generate_observation(self, agent_loc, object_status, reds, blues):
+        reds = np.array(reds).flatten()
+        blues = np.array(blues).flatten()
+        return np.concatenate([np.array(agent_loc), object_status * 14, reds, blues])
+
     def reset(self):
         """
         Should only call this function once, at the very beginning of each run
@@ -92,7 +97,8 @@ class ContinualCollectXY(CCPatch):
             if not int(self.obstacles_map[rx][ry]) and \
                     not (rx, ry) in self.object_coords:
                 self.agent_loc = rx, ry
-                return self.generate_state(self.agent_loc, self.object_status, self.reds, self.blues)
+                return self.generate_state(self.agent_loc, self.object_status, self.reds, self.blues), \
+                       self.generate_observation(self.agent_loc, self.object_status, self.reds, self.blues)
     
     def reset_fruit(self):
         obj_ids = np.arange(len(self.object_coords))
@@ -125,7 +131,7 @@ class ContinualCollectXY(CCPatch):
         return non_rewarding
 
     def step(self, a):
-        dx, dy = self.actions[a[0]]
+        dx, dy = self.actions[a]
         x, y = self.agent_loc
 
         nx = x + dx
@@ -135,6 +141,11 @@ class ContinualCollectXY(CCPatch):
         nx, ny = min(max(nx, self.min_x), self.max_x), min(max(ny, self.min_y), self.max_y)
         if not self.obstacles_map[nx][ny]:
             x, y = nx, ny
+            
+        if x == self.agent_loc[0] and y == self.agent_loc[1]:
+            direction = 4 # stay
+        else:
+            direction = a
 
         reward = 0.0
         if (x, y) in self.object_coords:
@@ -150,9 +161,9 @@ class ContinualCollectXY(CCPatch):
         self.agent_loc = x, y
         self.check_fruit_resetting()
 
-        # done = np.asarray(False)
         state = self.generate_state(self.agent_loc, self.object_status, self.reds, self.blues)
-        return state, np.asarray(reward), a[0]
+        observation = self.generate_observation(self.agent_loc, self.object_status, self.reds, self.blues)
+        return state, observation, np.asarray(reward), np.asarray(False), direction
 
     def get_visualization_segment(self):
         raise NotImplementedError
@@ -198,7 +209,7 @@ class ContinualCollectRGB(ContinualCollectXY):
         super(ContinualCollectRGB, self).reset_fruit()
         self.episode_template = self.get_episode_template(self.reds, self.blues)
 
-    def generate_state(self, agent_loc, object_status, reds, blues):
+    def generate_observation(self, agent_loc, object_status, reds, blues):
         state = np.copy(self.episode_template)
         x, y = agent_loc
 
@@ -222,7 +233,7 @@ class ContinualCollectRGB(ContinualCollectXY):
 
             state_coords = [[x, y] for x in range(15)
                            for y in range(15) if not int(self.obstacles_map[x][y])]
-            states = [self.generate_state(coord, self.object_status, self.reds) for coord in state_coords]
+            states = [self.generate_observation(coord, self.object_status, self.reds) for coord in state_coords]
             return np.array(states), np.array(state_coords)
         else:
             raise NotImplementedError
@@ -231,8 +242,8 @@ class ContinualCollectPartial(ContinualCollectRGB):
     def __init__(self, seed=np.random.randint(int(1e5))):
         super().__init__(seed)
 
-    def generate_state(self, agent_loc, object_status, reds, blues):
-        state = super().generate_state(agent_loc, object_status, reds, blues)
+    def generate_observation(self, agent_loc, object_status, reds, blues):
+        state = super().generate_observation(agent_loc, object_status, reds, blues)
         x, y = agent_loc
         if (x < 7 and y < 7):
             visual = [[i,j] for i in range(0, 8) for j in range(0, 8)]
@@ -255,9 +266,8 @@ class ContinualCollectPartial(ContinualCollectRGB):
         for coord in [[i,j] for i in range(0, 15) for j in range(0, 15)]:
             if coord not in visual:
                 state[coord[0], coord[1]] = np.array([128., 128., 128.])
-            else:
-                print(coord, state[coord])
-        print(state.shape)
+            # else:
+            #     print(coord, state[coord])
         return state
 
         
@@ -298,11 +308,11 @@ def draw_pretty(state):
     plt.close()
 
 if __name__ == '__main__':
-    env = ContinualCollectRGB()
-    state = env.reset()
+    env = ContinualCollectPartial()
+    state, observation = env.reset()
     done = False
     while not done:
         action = int(input('input_action: '))
-        state, reward, done, _ = env.step([action])
-        draw(state)
-        print(reward)
+        state, observation, reward, done, direction = env.step(action)
+        draw(observation)
+        print(reward, done, direction)
