@@ -57,7 +57,7 @@ class ContinualCollectXY(CCPatch):
         self.action_dim = 4
 
         self.obstacles_map = self.get_obstacles_map()
-        self.actions = [(-1, 0), (0, 1), (1, 0), (0, -1), (0, 0)] # up, right, down, left, stay
+        self.actions = [(0, 1), (1, 0), (0, -1), (-1, 0), (0, 0)] # right, down, left, up, stay
 
         self.agent_loc = (0, 0)
         self.object_status = np.ones(len(self.object_coords))
