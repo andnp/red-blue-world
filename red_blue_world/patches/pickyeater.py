@@ -79,12 +79,12 @@ class ContinualCollectXY(CCPatch):
     def generate_state(self, agent_loc, object_status, reds, blues):
         reds = np.array(reds).flatten()
         blues = np.array(blues).flatten()
-        return np.concatenate([np.array(agent_loc), object_status * 14, reds, blues])
+        return np.concatenate([np.array(agent_loc), object_status, reds, blues])
 
     def generate_observation(self, agent_loc, object_status, reds, blues):
         reds = np.array(reds).flatten()
         blues = np.array(blues).flatten()
-        return np.concatenate([np.array(agent_loc), object_status * 14, reds, blues])
+        return np.concatenate([np.array(agent_loc), object_status, reds, blues])
 
     def reset(self):
         """
