@@ -1,8 +1,7 @@
 
-from Patch import Patch
 import sqlite3
 import os, errno
-from typing import List
+from typing import List, Tuple, Any, Dict, AnyStr
 from abc import ABCMeta, abstractmethod
 import simplejson
 
@@ -22,23 +21,23 @@ class StoreFactory:
 class Store(metaclass=ABCMeta):
 
     @abstractmethod
-    def patch_exists(self, patch_id: str) -> bool:
+    def patch_exists(self, patch_id: AnyStr) -> bool:
         pass
 
     @abstractmethod
-    def load_patch_states(patch_ids: list) -> List[Patch]:
+    def load_patch_states(self, patch_ids: List) -> List[Tuple[Any, Any]]:
         pass
 
     @abstractmethod
-    def load_patch_state(patch_id: str) -> Patch: 
+    def load_patch_state(self, patch_id: AnyStr) -> Dict: 
         pass
 
     @abstractmethod
-    def store_patch(patch_id: str, patch_state: dict) -> None:
+    def store_patch(self, patch_id: AnyStr, patch_state: Dict) -> None:
         pass
 
 class SqliteBasicStorage(Store):
-    _instances = {}
+    _instances : Dict[Any, Any] = {}
 
     def __new__(cls, db_name):
         if cls not in cls._instances:
@@ -64,14 +63,14 @@ class SqliteBasicStorage(Store):
         cur.execute("CREATE TABLE patches(patch_id TEXT PRIMARY KEY, patch_state TEXT NOT NULL)")
 
 
-    def patch_exists(self, patch_id: str) -> bool:
+    def patch_exists(self, patch_id: AnyStr) -> bool:
         cur = self.con.cursor()
         exist_cmd = '''SELECT 1 FROM patches WHERE patch_id=? LIMIT 1'''
         cur.execute(exist_cmd, (patch_id,))
         exists = cur.fetchone() is not None
         return exists
 
-    def load_patch_states(self, patch_ids: list) -> List[Patch]:
+    def load_patch_states(self, patch_ids: List) -> List[Tuple[Any, Any]]:
         cur = self.con.cursor()
         load_cmd = '''SELECT * FROM patches WHERE patch_id IN (%s)'''
         cur.execute(load_cmd % ','.join('?'*len(patch_ids)), patch_ids)
@@ -79,17 +78,17 @@ class SqliteBasicStorage(Store):
         json_loaded = [(patch_id, simplejson.loads(state_json)) for patch_id, state_json in ids_and_patch_states]
         return json_loaded 
 
-    def load_patch_state(self, patch_id: str) -> dict: 
+    def load_patch_state(self, patch_id: AnyStr) -> Dict: 
         cur = self.con.cursor()
         load_cmd = '''SELECT patch_state FROM patches WHERE patch_id=?'''
         cur.execute(load_cmd, (patch_id,))
         str_patch_state = cur.fetchone()
         if(str_patch_state is None):
-            return None
+            return {}
         json_loaded = simplejson.loads(str_patch_state[0])
         return json_loaded
 
-    def store_patch(self, patch_id: str, patch_state: dict) -> None:
+    def store_patch(self, patch_id: AnyStr, patch_state: Dict) -> None:
         json_rep = simplejson.dumps(patch_state)
         insert_cmd = '''INSERT INTO patches(patch_id, patch_state) VALUES(?,?) 
         ON CONFLICT(patch_id) DO UPDATE SET patch_state=excluded.patch_state'''

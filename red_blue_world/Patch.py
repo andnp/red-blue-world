@@ -19,6 +19,9 @@ PatchState = Any
 
 
 class Patch:
+    def __init__(self, id: str) -> None:
+        self.patch_id = id
+
     @abstractmethod
     def load(self, patch_state: PatchState) -> None:
         ...

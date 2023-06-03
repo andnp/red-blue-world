@@ -9,7 +9,8 @@ authors = [
 dependencies = [
     "numpy>=1.24.3",
     "numba>=0.57.0",
-    "simplejson"
+    "simplejson",
+    "types-simplejson"
 ]
 requires-python = ">=3.10"
 readme = "README.md"
