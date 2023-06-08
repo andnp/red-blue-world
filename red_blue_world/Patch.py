@@ -19,6 +19,9 @@ PatchState = Any
 
 
 class Patch:
+    def __init__(self, id: str) -> None:
+        self.patch_id = id
+
     @abstractmethod
     def load(self, patch_state: PatchState) -> None:
         ...
@@ -32,5 +35,8 @@ class Patch:
         ...
 
     @abstractmethod
-    def serialize(self) -> PatchState:
+    def serialize(self) -> dict:
         ...
+
+    def get_patch_id(self)-> str:
+        return self.patch_id
