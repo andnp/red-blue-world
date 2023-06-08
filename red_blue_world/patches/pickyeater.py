@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 from red_blue_world.Patch import *
 
 class CCPatch(Patch):
-    def __init__(self):
-        super(CCPatch, self).__init__()
-        self.last_agent_state = None
+    def __init__(self, id: str):
+        super(CCPatch, self).__init__(id)
+        self.last_agent_state: np.ndarray | None = None
 
     def load(self, patch_state: PatchState) -> None:
         self.rewarding_color = patch_state['rewarding_color']
@@ -18,11 +18,11 @@ class CCPatch(Patch):
         self.agent_loc = patch_state['agent_loc']
         self.last_agent_state = patch_state['last_agent_state']
         return
-    
+
     def on_enter(self, last_agent_state: np.ndarray) -> None:
         self.last_agent_state = last_agent_state
         return
-    
+
     def serialize(self) -> PatchState:
         object = {
             "rewarding_color": self.rewarding_color,
@@ -45,8 +45,8 @@ class ContinualCollectXY(CCPatch):
     Remove penalty each timestep
     Reset fruit when there is no more fruit to pick
     """
-    def __init__(self, seed=np.random.randint(int(1e5))):
-        super(ContinualCollectXY, self).__init__()
+    def __init__(self, id: str, seed=np.random.randint(int(1e5))):
+        super(ContinualCollectXY, self).__init__(id)
         self.object_coords = [(7, 2), (2, 7), (8, 6), (6, 8),
                               (8, 0), (0, 8), (14, 0), (0, 14),
                               (6, 14), (14, 6), (7, 11), (11, 7)]
@@ -69,10 +69,10 @@ class ContinualCollectXY(CCPatch):
         self.rewarding_blocks = None
         self.penalty_color = 'blue'
         self.penalty_blocks = None
-        
+
     def get_action_dim(self):
         return len(self.actions)
-    
+
     def info(self, key):
         return
 
@@ -99,7 +99,7 @@ class ContinualCollectXY(CCPatch):
                 self.agent_loc = rx, ry
                 return self.generate_state(self.agent_loc, self.object_status, self.reds, self.blues), \
                        self.generate_observation(self.agent_loc, self.object_status, self.reds, self.blues)
-    
+
     def reset_fruit(self):
         obj_ids = np.arange(len(self.object_coords))
         obj_ids = np.random.permutation(obj_ids)
@@ -141,7 +141,7 @@ class ContinualCollectXY(CCPatch):
         nx, ny = min(max(nx, self.min_x), self.max_x), min(max(ny, self.min_y), self.max_y)
         if not self.obstacles_map[nx][ny]:
             x, y = nx, ny
-            
+
         if x == self.agent_loc[0] and y == self.agent_loc[1]:
             direction = 4 # stay
         else:
@@ -157,7 +157,7 @@ class ContinualCollectXY(CCPatch):
                     reward += 1.0
                 elif (x, y) in self.penalty_blocks:
                     reward += -1.0
-        
+
         self.agent_loc = x, y
         self.check_fruit_resetting()
 
@@ -182,8 +182,8 @@ class ContinualCollectXY(CCPatch):
 
 
 class ContinualCollectRGB(ContinualCollectXY):
-    def __init__(self, seed=np.random.randint(int(1e5))):
-        super().__init__(seed)
+    def __init__(self, id: str, seed=np.random.randint(int(1e5))):
+        super().__init__(id, seed)
         np.random.seed(seed)
         d = len(self.obstacles_map)
         self.state_dim = (d, d, 3)
@@ -239,8 +239,8 @@ class ContinualCollectRGB(ContinualCollectXY):
             raise NotImplementedError
 
 class ContinualCollectPartial(ContinualCollectRGB):
-    def __init__(self, seed=np.random.randint(int(1e5))):
-        super().__init__(seed)
+    def __init__(self, id: str, seed=np.random.randint(int(1e5))):
+        super().__init__(id, seed)
 
     def generate_observation(self, agent_loc, object_status, reds, blues):
         state = super().generate_observation(agent_loc, object_status, reds, blues)
@@ -270,7 +270,7 @@ class ContinualCollectPartial(ContinualCollectRGB):
             #     print(coord, state[coord])
         return state
 
-        
+
 def draw(state):
     frame = state.astype(np.uint8)
     figure, ax = plt.subplots()
@@ -279,7 +279,7 @@ def draw(state):
     plt.show()
     # plt.savefig("../../plot/img/picky_eater.pdf", dpi=300, bbox_inches='tight')
     plt.close()
-    
+
 def draw_pretty(state):
     frame = state.astype(np.uint8)
 
@@ -308,7 +308,7 @@ def draw_pretty(state):
     plt.close()
 
 if __name__ == '__main__':
-    env = ContinualCollectPartial()
+    env = ContinualCollectPartial('(0,0)')
     state, observation = env.reset()
     done = False
     while not done:
