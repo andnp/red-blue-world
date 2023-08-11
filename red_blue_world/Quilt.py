@@ -57,7 +57,7 @@ class Quilt:
         self._ensure_load(next_id, next_loc)
 
         # asynchronously load the 3x3 square around the next patch
-        self._back_thread.submit(self._ensure_load3x3, patch_id)
+        self._back_thread.submit(self._ensure_load3x3, (patch_id, next_loc))
 
         return next_id
 
@@ -72,19 +72,19 @@ class Quilt:
 
         self._patches[patch_id] = patch
 
-    def _ensure_load3x3(self, patch_id: PatchID) -> None:
+    def _ensure_load3x3(self, patch_id: PatchID, agent_loc: AgentState) -> None:
         x, y = patch_id
 
         for dx, dy in product(range(-1, 2), range(-1, 2)):
             coord = (x + dx, y + dy)
-            self._ensure_load(coord)
+            self._ensure_load(coord, agent_loc)
 
-    def _ensure_load9x9(self, patch_id: PatchID) -> None:
+    def _ensure_load9x9(self, patch_id: PatchID, agent_loc: AgentState) -> None:
         x, y = patch_id
 
         for dx, dy in product(range(-3, 4), range(-3, 4)):
             coord = (x + dx, y + dy)
-            self._ensure_load(coord)
+            self._ensure_load(coord, agent_loc)
 
     def _maybe_unload(self, patch_id: PatchID) -> None:
         # always reset the clock for the current patch
