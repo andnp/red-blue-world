@@ -188,23 +188,11 @@ class ContinualCollectXY(CCPatch):
         _map[4:11, 7] = 1.0
         _map[13:, 7] = 1.0
 
-        #top wall
-        #_map[0:2, 0] = 1.0
-        #_map[4:7, 0] = 1.0
-        #_map[7:11, 0] = 1.0
-        #_map[13:15, 0] = 1.0
-
         #bottom wall
         _map[0:2, 14] = 1.0
         _map[4:7, 14] = 1.0
         _map[7:11, 14] = 1.0
         _map[13:15, 14] = 1.0
-
-        #left wall
-        #_map[0, 0:2] = 1.0
-        #_map[0, 4:7] = 1.0
-        #_map[0, 7:11] = 1.0
-        #_map[0, 13:15] = 1.0
 
         #right wall
         _map[14, 0:2] = 1.0
