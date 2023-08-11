@@ -31,14 +31,14 @@ class RedBlueEnv:
 
     def step(self, action):
         """ Take a step in the environment. """
-        
+
         # TODO: make new_patch and direction the same type (the last element of output)
         return self.env.step(action)
 
 
 if __name__ == '__main__':
     config = {
-        'env_name': 'pe_partial',
+        'env_name': 'gw',
         'grid_size': 5
     }
 
@@ -49,9 +49,7 @@ if __name__ == '__main__':
     done = False
     while not done:
         action = int(input('input_action: '))
-        state, observation, reward, done, new_patch = env.step(action)
-        
-        print(f'state: {state}, observation: {observation}, reward: {reward}, done: {done}, new_patch: {new_patch}')
+        state, observation, reward, direction = env.step(action)
 
-        if new_patch:
-            break
+        print(
+            f'state: {state}, observation: \n{observation}, reward: {reward}, direction: {direction}')
