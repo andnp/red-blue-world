@@ -61,7 +61,6 @@ class ContinualGridWorld(Patch):
         }
 
         self.config = self._get_config()
-        print(self.config)
 
     def _choose_objects(self) -> Tuple[np.ndarray, np.ndarray]:
         """ Returns a tuple of coordinates and corresponding labels of both jelly beans and onions. """
