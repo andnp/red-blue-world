@@ -98,15 +98,11 @@ class Quilt:
 
         # assumes that `self._unload_clocks` is usually empty or very small
         # otherwise, this would cause a performance degradation on every tick
-        delete_lst = []
         for key in self._unload_clocks:
             self._unload_clocks[key] -= 1
 
             if self._unload_clocks[key] == 0:
-                delete_lst.append(key)
                 self._back_thread.submit(self.unload_patch, key)
-        for key in delete_lst:
-            del self._unload_clocks[key]
 
     # -------------------
     # TEMP: type stubs --
@@ -123,6 +119,7 @@ class Quilt:
         # this should call out to the patch_loader
         # probably this can be inlined. Keeping as a type-stub for now
         del self._patches[patch_id]
+        del self._unload_clocks[patch_id]
 
     def patch_exists(self, patch_id: PatchID) -> bool:
         # this should call out to the patch_loader
