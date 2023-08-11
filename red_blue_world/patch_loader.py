@@ -9,14 +9,9 @@ from red_blue_world.patches.gw import ContinualGridWorld
 from red_blue_world.patches.pickyeater import ContinualCollectRGB, ContinualCollectPartial
 from red_blue_world.interfaces import AgentState, Direction
 
-# hard coding the size
-# TODO: should change this later
-SIZE = 15
-
-def patch_loader(name, agent_loc):
-    if name == 'gw':
-        size = SIZE #some number
-        return ContinualGridWorld(size, agent_loc)
+def patch_loader(env_name, env_size, agent_loc):
+    if env_name == 'gw':
+        return ContinualGridWorld(env_size, agent_loc)
     
 def transit_agent(d: Direction, agent_loc: AgentState):
     env_x, env_y = SIZE, SIZE

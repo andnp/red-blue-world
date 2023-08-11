@@ -14,10 +14,15 @@ from red_blue_world import patch_loader
 PatchID = Tuple[int, int]
 
 class Quilt:
-    def __init__(self) -> None:
+    def __init__(self, config) -> None:
+        self.env_name = config['env_name']
+        self.env_size = config['grid_size']
+        self.reset()
+        
+    def reset(self):
         self._patches: Dict[PatchID, Patch] = {}
         self._active_patch_id: PatchID = (0, 0)
-        self._active_patch: Patch = self.build_patch(None)
+        self._active_patch: Patch = self.build_patch(self.env_name, self.env_size, None)
 
         self._t = 0
         self.agent_loc = None
@@ -68,7 +73,7 @@ class Quilt:
         if self.patch_exists(patch_id):
             patch = self.load_patch(patch_id, agent_loc)
         else:
-            patch = self.build_patch(agent_loc)
+            patch = self.build_patch(self.env_name, self.env_size, agent_loc)
 
         self._patches[patch_id] = patch
 
@@ -120,9 +125,9 @@ class Quilt:
         # probably this can be inlined. Keeping as a type-stub for now
         return self._patches.get(patch_id, None) is not None
 
-    def build_patch(self, agent_loc) -> Patch:
+    def build_patch(self, env_name, env_size, agent_loc) -> Patch:
         # Calling patch_loader to initialize a new patch
-        return patch_loader.patch_loader('gw', agent_loc)
+        return patch_loader.patch_loader(env_name, env_size, agent_loc)
 
 # ------------------------
 # -- Internal utilities --

@@ -1,55 +1,22 @@
-import numpy as np
-
-from patches.gw import ContinualGridWorld
-from patches.pickyeater import ContinualCollectPartial, ContinualCollectRGB, ContinualCollectXY
-
+from Quilt import Quilt
 
 class RedBlueEnv:
     def __init__(self, config):
         self.env_name = config['env_name']
         self.gird_size = config['grid_size']
 
-        self.env = self._init_env()
+        self.quilt = self._init_env(config)
 
-    def _init_env(self):
+    def _init_env(self, config):
         """ Initialize the environment based on the config. """
-
-        if self.env_name == 'gw':
-            env = ContinualGridWorld(self.gird_size)
-        elif self.env_name == 'pe_partial':
-            env = ContinualCollectPartial(self.gird_size)
-        elif self.env_name == 'pe_rgb':
-            env = ContinualCollectRGB(self.gird_size)
-        elif self.env_name == 'pe_xy':
-            env = ContinualCollectXY(self.gird_size)
-
+        env = Quilt(config)
         return env
 
     def reset(self):
         """ Reset the environment to the start state. """
-        return self.env.reset()
+        return self.quilt.reset()
 
     def step(self, action):
         """ Take a step in the environment. """
-
-        # TODO: make new_patch and direction the same type (the last element of output)
-        return self.env.step(action)
-
-
-if __name__ == '__main__':
-    config = {
-        'env_name': 'gw',
-        'grid_size': 5
-    }
-
-    np.random.seed(0)
-
-    env = RedBlueEnv(config)
-    state, observation = env.reset()
-    done = False
-    while not done:
-        action = int(input('input_action: '))
-        state, observation, reward, direction = env.step(action)
-
-        print(
-            f'state: {state}, observation: \n{observation}, reward: {reward}, direction: {direction}')
+        """ Quilt will control the load and delete of the patches """
+        return self.quilt.step(action)
