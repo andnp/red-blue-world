@@ -49,18 +49,16 @@ class ContinualCollectXY(CCPatch):
     Reset fruit when there is no more fruit to pick
     """
 
-    def __init__(self, id: str, seed=np.random.randint(int(1e5))):
+    def __init__(self, id: str, seed=np.random.randint(int(1e5)), num_objects=8):
         super(ContinualCollectXY, self).__init__(id)
-        self.object_coords = [(7, 2), (2, 7), (8, 6),
-                              (6, 8), (14, 2), (3, 14),
-                              (14, 11), (7, 11), (11, 7)]
         np.random.seed(seed)
+        self.obstacles_map = self.get_obstacles_map()
+        self.randomize_object_locations(num_objects)
 
         # one indiciate the object is available to be picked up
         self.object_status = np.ones(len(self.object_coords))
         self.action_dim = 4
 
-        self.obstacles_map = self.get_obstacles_map()
         self.actions = [(0, 1), (1, 0), (0, -1), (-1, 0),
                         (0, 0)]  # right, down, left, up, stay
 
@@ -130,7 +128,7 @@ class ContinualCollectXY(CCPatch):
     def check_fruit_resetting(self):
         non_rewarding = True
         for [x, y] in self.rewarding_blocks:
-            object_idx = self.object_coords.index((x, y))
+            object_idx = self.object_coords.index([x, y])
             if self.object_status[object_idx]:
                 non_rewarding = False
         if non_rewarding:
@@ -201,9 +199,16 @@ class ContinualCollectXY(CCPatch):
         _map[14, 13:15] = 1.0
         return _map
 
+    def randomize_object_locations(self, total_objects):
+        # get list of empty spaces, and randomly pick some spots to place fruits
+        empty_space = np.argwhere(self.obstacles_map != 1.0)
+        empty_space_ids = np.arange(len(empty_space))
+        object_locations = np.random.choice(empty_space_ids, total_objects)
+        self.object_coords = empty_space[object_locations].tolist()
+
 
 class ContinualCollectRGB(ContinualCollectXY):
-    def __init__(self, id: str, seed=np.random.randint(int(1e5))):
+    def __init__(self, id: str, seed=np.random.randint(int(1e5)), num_objects=8):
         super().__init__(id, seed)
         np.random.seed(seed)
         d = len(self.obstacles_map)
@@ -263,7 +268,7 @@ class ContinualCollectRGB(ContinualCollectXY):
 
 
 class ContinualCollectPartial(ContinualCollectRGB):
-    def __init__(self, id: str, seed=np.random.randint(int(1e5))):
+    def __init__(self, id: str, seed=np.random.randint(int(1e5)), num_objects=8):
         super().__init__(id, seed)
 
     def generate_observation(self, agent_loc, object_status, reds, blues):
