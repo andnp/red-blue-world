@@ -51,9 +51,9 @@ class ContinualCollectXY(CCPatch):
 
     def __init__(self, id: str, seed=np.random.randint(int(1e5))):
         super(ContinualCollectXY, self).__init__(id)
-        self.object_coords = [(7, 2), (2, 7), (8, 6), (6, 8),
-                              (8, 0), (0, 8), (14, 0), (0, 14),
-                              (6, 14), (14, 6), (7, 11), (11, 7)]
+        self.object_coords = [(7, 2), (2, 7), (8, 6),
+                              (6, 8), (14, 2), (3, 14),
+                              (14, 11), (7, 11), (11, 7)]
         np.random.seed(seed)
 
         # one indiciate the object is available to be picked up
@@ -188,6 +188,17 @@ class ContinualCollectXY(CCPatch):
         _map[4:11, 7] = 1.0
         _map[13:, 7] = 1.0
 
+        #bottom wall
+        _map[0:2, 14] = 1.0
+        _map[4:7, 14] = 1.0
+        _map[7:11, 14] = 1.0
+        _map[13:15, 14] = 1.0
+
+        #right wall
+        _map[14, 0:2] = 1.0
+        _map[14, 4:7] = 1.0
+        _map[14, 7:11] = 1.0
+        _map[14, 13:15] = 1.0
         return _map
 
 
@@ -325,7 +336,7 @@ def draw_pretty(state):
 
 
 if __name__ == '__main__':
-    env = ContinualCollectXY('(0,0)')
+    env = ContinualCollectRGB('(0,0)')
     state, observation = env.reset()
     done = False
     while not done:
