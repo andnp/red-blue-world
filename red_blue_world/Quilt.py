@@ -36,7 +36,7 @@ class Quilt:
 
     def step(self, a: Action) -> Tuple[EnvState, AgentState, Reward]:
         s, o, r, d = self._active_patch.step(a)
-
+        
         # use direction signal coming from Patch.step to signal that it is time to transition
         if d != Direction.none:
             self._maybe_unload(self._active_patch_id)
@@ -55,9 +55,9 @@ class Quilt:
         else:
             assert d == Direction.right
             next_id = _right(patch_id)
-        
         next_loc = patch_loader.transit_agent(d, agent_loc, self.env_size)
-        
+        print(next_loc)
+
         # *synchronously* ensure the next patch is loaded
         # if this is anything more than a no-op, we screwed up somewhere
         self._ensure_load(next_id, next_loc)

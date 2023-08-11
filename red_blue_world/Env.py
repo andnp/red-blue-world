@@ -20,3 +20,19 @@ class RedBlueEnv:
         """ Take a step in the environment. """
         """ Quilt will control the load and delete of the patches """
         return self.quilt.step(action)
+
+if __name__ == '__main__':
+    config = {
+        'env_name': 'gw',
+        'grid_size': 500
+    }
+    env = RedBlueEnv(config)
+    action = 1
+    n=0
+    env.reset()
+    
+    while n < 1000000:
+        output = env.step(action)
+        n += 1
+        # if n % 1000 == 0:
+        print(n)
