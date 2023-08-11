@@ -53,7 +53,6 @@ class ContinualCollectXY(CCPatch):
         super(ContinualCollectXY, self).__init__(id)
         np.random.seed(seed)
         self.obstacles_map = self.get_obstacles_map()
-        self.empty_space = np.argwhere(self.obstacles_map != 1.0)
         self.randomize_object_locations(num_objects)
 
         # one indiciate the object is available to be picked up
@@ -202,9 +201,10 @@ class ContinualCollectXY(CCPatch):
 
     def randomize_object_locations(self, total_objects):
         # get list of empty spaces, and randomly pick some spots to place fruits
-        empty_space_ids = np.arange(len(self.empty_space))
+        empty_space = np.argwhere(self.obstacles_map != 1.0)
+        empty_space_ids = np.arange(len(empty_space))
         object_locations = np.random.choice(empty_space_ids, total_objects)
-        self.object_coords = self.empty_space[object_locations].tolist()
+        self.object_coords = empty_space[object_locations].tolist()
 
 
 class ContinualCollectRGB(ContinualCollectXY):
