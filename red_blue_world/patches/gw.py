@@ -41,10 +41,10 @@ class ContinualGridWorld(Patch):
 
         self._action_dim = 5
         self._actions = {
-            Action.right.value: (0, 1),
-            Action.down.value: (1, 0),
-            Action.left.value: (0, -1),
-            Action.up.value: (-1, 0),
+            Action.up.value: (0, 1),
+            Action.down.value: (0, -1),
+            Action.left.value: (-1, 0),
+            Action.right.value: (1, 0),
             Action.stay.value: (0, 0)
         }
 
