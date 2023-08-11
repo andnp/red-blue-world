@@ -5,6 +5,7 @@ AgentState = np.ndarray
 Action = int
 Reward = float
 
+
 class Direction(enum.Enum):
     up = 0
     right = 1

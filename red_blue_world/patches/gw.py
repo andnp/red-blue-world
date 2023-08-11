@@ -1,21 +1,24 @@
 import numpy as np
-import matplotlib.pyplot as plt
+import enum
 import pygame
-
-from red_blue_world.Patch import Patch
 from typing import Tuple, NamedTuple
 
-RIGHT = 0
-DOWN = 1
-LEFT = 2
-UP = 3
-STAY = 4
+from red_blue_world.Patch import Patch
+from red_blue_world.interfaces import Direction
 
+
+OBJECT_PERCENTAGE = 0.1
 FLOWER = 1
 WEED = 2
 AGENT = 3
 
-OBJECT_PERCENTAGE = 0.1
+
+class Action(enum.Enum):
+    up = 0
+    right = 1
+    down = 2
+    left = 3
+    stay = 4
 
 
 class PatchConfig(NamedTuple):
@@ -28,31 +31,45 @@ class PatchConfig(NamedTuple):
 
 
 class ContinualGridWorld(Patch):
-    def __init__(self, size: int):
+    def __init__(self, size: int, agent_loc: Tuple[int, int] = None):
         self._size = size
         self._state = np.zeros(2)
-        self.agent_loc = None
+        self.agent_loc = agent_loc
 
         # getting the total number of cells in the grid
         self._cell_num = self._size ** 2
 
         self._action_dim = 5
         self._actions = {
-            RIGHT: (0, 1),
-            DOWN: (1, 0),
-            LEFT: (0, -1),
-            UP: (-1, 0),
-            STAY: (0, 0)
+            Action.right.value: (0, 1),
+            Action.down.value: (1, 0),
+            Action.left.value: (0, -1),
+            Action.up.value: (-1, 0),
+            Action.stay.value: (0, 0)
+        }
+
+        self._dir_mapping = {
+            Action.right.value: Direction.right,
+            Action.down.value: Direction.down,
+            Action.left.value: Direction.left,
+            Action.up.value: Direction.up
+        }
+
+        self._rewards = {
+            FLOWER: 1,
+            WEED: -1
         }
 
         self.config = self._get_config()
+        print(self.config)
 
     def _choose_objects(self) -> Tuple[np.ndarray, np.ndarray]:
         """ Returns a tuple of coordinates and corresponding labels of both jelly beans and onions. """
         object_num = min(
             max(int(self._cell_num * OBJECT_PERCENTAGE), 1), self._cell_num)
         choosen_coords = np.random.choice(self._cell_num, object_num)
-        labels = np.random.choice([FLOWER, WEED], size=object_num)
+        labels = np.random.choice(
+            [FLOWER, WEED], size=object_num)
         return choosen_coords, labels
 
     def _to_coords(self, coord: int) -> Tuple[int, int]:
@@ -60,6 +77,9 @@ class ContinualGridWorld(Patch):
         x = coord % self._size
         y = coord // self._size
         return x, y
+
+    def _to_idx(self, x: int, y: int) -> int:
+        return x + y * self._size
 
     def _get_random_coordinate(self) -> Tuple[int, int]:
         """ Randomly chooses a coordinate that is not occupied. """
@@ -87,15 +107,16 @@ class ContinualGridWorld(Patch):
         self.agent_loc = rand_state
         return self.generate_state(), self.generate_observation()
 
-    # TODO: have different state and observation, make them the same if needed
     def generate_state(self) -> tuple:
         """ Getting the state of the grid world. """
         return np.array(self.agent_loc)
 
     def get_reward(self) -> int:
         """ Getting the reward of the grid world. """
-        current_state = self.config.get(self.agent_loc)
-        return current_state.label if current_state else -1
+        current_idx = self._to_idx(*self.agent_loc)
+        current_state = self.config.get(current_idx)
+
+        return self._rewards[current_state.label] if current_state else 0
 
     def get_action_dim(self) -> int:
         """ Getting the action dimension of the grid world."""
@@ -110,22 +131,19 @@ class ContinualGridWorld(Patch):
         grid[self.agent_loc[0], self.agent_loc[1]] = AGENT
         return grid
 
-    def _check_inner_bounds(self, x: int, y: int) -> bool:
-        """ Checking if the next position is within the bounds of the grid. 
-        Making sure it is at least 2 steps away from the edge."""
-        return 1 < x < self._size - 1 or 1 < y < self._size - 1
+    def _check_bounds(self, x, y) -> Direction:
+        return 0 <= x < self._size and 0 <= y < self._size
 
-    def step(self, action: int) -> Tuple[np.ndarray, int, bool]:
+    def step(self, action: int) -> Tuple[np.ndarray, int]:
         """ Taking a step in the grid world environment according to given action. """
-        self.take_action(action)
+        direction = self.take_action(action)
 
         # Ensuring the next position is within bounds
-        new_patch = not self._check_inner_bounds(*self.agent_loc)
         reward = self.get_reward()
         state = self.generate_state()
         observation = self.generate_observation()
 
-        return state, observation, np.asarray(reward), np.asarray(False), new_patch
+        return state, observation, np.asarray(reward), direction
 
     def take_action(self, action: int):
         """ Takes an action and returns the new state. """
@@ -136,7 +154,11 @@ class ContinualGridWorld(Patch):
         else:
             raise Exception(f'Unknown action: {action}')
 
-        self.agent_loc = x, y
+        if self._check_bounds(x, y):
+            self.agent_loc = x, y
+            return Direction.none
+
+        return self._dir_mapping[action]
 
 
 def visualize(observation: np.ndarray):
