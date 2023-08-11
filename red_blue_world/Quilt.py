@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from itertools import product
 from typing import Dict, Tuple
 
-from red_blue_world.interfaces import Action, AgentState, Direction, Reward
+from red_blue_world.interfaces import Action, EnvState, AgentState, Direction, Reward
 from red_blue_world.Patch import Patch
 from red_blue_world import patch_loader
 
@@ -17,7 +17,6 @@ class Quilt:
     def __init__(self, config) -> None:
         self.env_name = config['env_name']
         self.env_size = config['grid_size']
-        self.reset()
         
     def reset(self):
         self._patches: Dict[PatchID, Patch] = {}
@@ -32,9 +31,11 @@ class Quilt:
 
         # ensure the initial patch is cached
         self._patches[self._active_patch_id] = self._active_patch
+        
+        return self._active_patch.reset()
 
-    def step(self, a: Action) -> Tuple[AgentState, Reward]:
-        s, r, d = self._active_patch.step(a)
+    def step(self, a: Action) -> Tuple[EnvState, AgentState, Reward]:
+        s, o, r, d = self._active_patch.step(a)
 
         # use direction signal coming from Patch.step to signal that it is time to transition
         if d != Direction.none:
@@ -45,7 +46,7 @@ class Quilt:
             self._active_patch = self._patches[next_id]
             self._active_patch.on_enter(s)
             
-        return (s, r)
+        return (s, o, r)
 
     def _handle_patch_transition(self, patch_id: PatchID, d: Direction, agent_loc: AgentState) -> PatchID:
         if d == Direction.up: next_id = _up(patch_id)
@@ -55,7 +56,7 @@ class Quilt:
             assert d == Direction.right
             next_id = _right(patch_id)
         
-        next_loc = patch_loader.transit_agent(d, agent_loc)
+        next_loc = patch_loader.transit_agent(d, agent_loc, self.env_size)
         
         # *synchronously* ensure the next patch is loaded
         # if this is anything more than a no-op, we screwed up somewhere
@@ -97,12 +98,15 @@ class Quilt:
 
         # assumes that `self._unload_clocks` is usually empty or very small
         # otherwise, this would cause a performance degradation on every tick
+        delete_lst = []
         for key in self._unload_clocks:
             self._unload_clocks[key] -= 1
 
             if self._unload_clocks[key] == 0:
-                del self._unload_clocks[key]
+                delete_lst.append(key)
                 self._back_thread.submit(self.unload_patch, key)
+        for key in delete_lst:
+            del self._unload_clocks[key]
 
     # -------------------
     # TEMP: type stubs --

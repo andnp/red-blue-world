@@ -13,8 +13,8 @@ def patch_loader(env_name, env_size, agent_loc):
     if env_name == 'gw':
         return ContinualGridWorld(env_size, agent_loc)
     
-def transit_agent(d: Direction, agent_loc: AgentState):
-    env_x, env_y = SIZE, SIZE
+def transit_agent(d: Direction, agent_loc: AgentState, env_size):
+    env_x, env_y = env_size, env_size
     x, y = agent_loc
     if d == Direction.up:
         next_loc = (x, 0)

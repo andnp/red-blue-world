@@ -134,7 +134,7 @@ class ContinualGridWorld(Patch):
     def _check_bounds(self, x, y) -> Direction:
         return 0 <= x < self._size and 0 <= y < self._size
 
-    def step(self, action: int) -> Tuple[np.ndarray, int]:
+    def step(self, action: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Direction]:
         """ Taking a step in the grid world environment according to given action. """
         direction = self.take_action(action)
 

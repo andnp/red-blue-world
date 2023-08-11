@@ -173,7 +173,7 @@ class ContinualCollectXY(CCPatch):
             self.agent_loc, self.object_status, self.reds, self.blues)
         observation = self.generate_observation(
             self.agent_loc, self.object_status, self.reds, self.blues)
-        return state, observation, np.asarray(reward), np.asarray(False), direction
+        return state, observation, np.asarray(reward), direction
 
     def get_visualization_segment(self):
         raise NotImplementedError
