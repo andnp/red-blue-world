@@ -40,3 +40,9 @@ class Patch:
 
     def get_patch_id(self)-> str:
         return self.patch_id
+    
+    def get_config(self)-> dict:
+        ...
+
+    def get_view(self, x: int, y: int, dx: int, dy: int)-> np.ndarray:
+        ...
