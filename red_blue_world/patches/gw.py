@@ -61,6 +61,20 @@ class ContinualGridWorld(Patch):
         }
 
         self.config = self._get_config()
+        self.view = self._get_view()
+        
+    def get_config(self):
+        return self.config
+    
+    def get_view(self, x, y, dx, dy):
+        return self.view[x: x+dx, y: y+dy]
+
+    def _get_view(self) -> np.ndarray:
+        """ Getting the observation of the grid world. """
+        grid = np.zeros((self._size, self._size))
+        for value in self.config.values():
+            grid[value.x, value.y] = value.label
+        return grid
 
     def _choose_objects(self) -> Tuple[np.ndarray, np.ndarray]:
         """ Returns a tuple of coordinates and corresponding labels of both jelly beans and onions. """
@@ -104,7 +118,7 @@ class ContinualGridWorld(Patch):
         to give the strt position of the agent. """
         rand_state = self._get_random_coordinate()
         self.agent_loc = rand_state
-        return self.generate_state(), self.generate_observation()
+        return self.generate_state()
 
     def generate_state(self) -> tuple:
         """ Getting the state of the grid world. """
@@ -121,28 +135,18 @@ class ContinualGridWorld(Patch):
         """ Getting the action dimension of the grid world."""
         return self._action_dim
 
-    def generate_observation(self) -> np.ndarray:
-        """ Getting the observation of the grid world. """
-        grid = np.zeros((self._size, self._size))
-        for value in self.config.values():
-            grid[value.x, value.y] = value.label
-
-        grid[self.agent_loc[0], self.agent_loc[1]] = AGENT
-        return grid
-
     def _check_bounds(self, x, y) -> Direction:
         return 0 <= x < self._size and 0 <= y < self._size
 
-    def step(self, action: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Direction]:
+    def step(self, action: int) -> Tuple[np.ndarray, np.ndarray, Direction]:
         """ Taking a step in the grid world environment according to given action. """
         direction = self.take_action(action)
 
         # Ensuring the next position is within bounds
         reward = self.get_reward()
         state = self.generate_state()
-        observation = self.generate_observation()
 
-        return state, observation, np.asarray(reward), direction
+        return state, np.asarray(reward), direction
 
     def take_action(self, action: int):
         """ Takes an action and returns the new state. """
